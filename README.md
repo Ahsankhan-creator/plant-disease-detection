@@ -80,7 +80,7 @@ An advanced deep learning-based system for detecting and classifying plant disea
 
 ### Core Technologies
 - **Python 3.8+**: Primary programming language
-- **TensorFlow / PyTorch**: Deep learning frameworks
+- **TensorFlow** or **PyTorch**: Deep learning frameworks (either can be used)
 - **OpenCV**: Image processing
 - **NumPy & Pandas**: Data manipulation and analysis
 
@@ -156,6 +156,8 @@ source venv/bin/activate
 python -m venv venv
 venv\Scripts\activate
 ```
+
+> **Note**: If you forked this repository, replace `Ahsankhan-creator` with your GitHub username in the clone command above.
 
 ### 3. Install Dependencies
 
@@ -271,10 +273,12 @@ Start the web application:
 # Development mode
 python app.py
 
-# Or with Flask
-flask run --host=0.0.0.0 --port=5000
+# Or with Flask (development)
+flask run --host=127.0.0.1 --port=5000
 
 # Production mode with Gunicorn
+# WARNING: Binding to 0.0.0.0 exposes the app to all network interfaces
+# Ensure proper firewall and security configurations are in place
 gunicorn -w 4 -b 0.0.0.0:8000 app:app
 ```
 
@@ -569,7 +573,7 @@ Edit `config/config.json` to customize the application:
     "confidence_threshold": 0.75
   },
   "api": {
-    "host": "0.0.0.0",
+    "host": "127.0.0.1",  // Use "0.0.0.0" only in production with proper security
     "port": 5000,
     "debug": false,
     "max_upload_size": "10MB"
