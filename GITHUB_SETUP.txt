@@ -1,0 +1,20 @@
+#!/bin/bash
+# GitHub Setup Commands
+
+# After creating repository on GitHub, run these commands:
+
+echo "1. Create new repository on GitHub: https://github.com/new"
+echo "   Repository name: plant-disease-detection"
+echo "   Keep it PUBLIC (model is too large for private free tier)"
+echo ""
+echo "2. Then run these commands:"
+echo ""
+echo "git remote add origin https://github.com/YOUR-USERNAME/plant-disease-detection.git"
+echo "git branch -M main"
+echo "git push -u origin main"
+echo ""
+echo "3. After push completes, go to Vercel Dashboard:"
+echo "   https://vercel.com/new"
+echo "   - Import your GitHub repository"
+echo "   - Add environment variables in Settings"
+echo "   - Auto-deploys on every push!"

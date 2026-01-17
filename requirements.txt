@@ -1,0 +1,21 @@
+# Core Flask Framework
+Flask==2.3.3
+flask-cors==4.0.0
+Werkzeug==2.3.7
+
+# AI/ML Dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+accelerate>=0.20.0
+safetensors>=0.3.0
+
+# Image Processing
+Pillow==10.0.0
+
+# API Clients
+requests==2.31.0
+groq==0.4.1
+
+# Optimization for Vercel
+gunicorn==21.2.0

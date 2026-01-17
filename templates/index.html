@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlantGuard AI - Plant Disease Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f7f7f8;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .plant-icon {
+            font-size: 24px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        /* Weather Widget */
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f7fafc;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .weather-widget:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+
+        .weather-icon {
+            font-size: 32px;
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .weather-temp {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .weather-location {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        /* Weather Modal */
+        .weather-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .weather-modal.show {
+            display: flex;
+        }
+
+        .weather-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .weather-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .weather-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .weather-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .weather-search {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .weather-search input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .weather-search button {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .weather-detail-item {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .weather-detail-label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .weather-detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .plant-care-tips {
+            margin-top: 20px;
+            padding: 16px;
+            background: #ecfdf5;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .plant-care-tips h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #065f46;
+            margin-bottom: 12px;
+        }
+
+        .plant-care-tips ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .plant-care-tips li {
+            font-size: 13px;
+            color: #047857;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .plant-care-tips li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        /* Messages */
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            line-height: 1.5;
+            color: #2d3748;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Image Preview in Chat */
+        .message-image {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Disease Result Card */
+        .disease-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            border-left: 4px solid #10b981;
+        }
+
+        .disease-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .disease-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a202c;
+        }
+
+        .confidence-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .disease-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 90px;
+        }
+
+        .info-value {
+            color: #2d3748;
+            flex: 1;
+        }
+
+        /* Voice Button */
+        .voice-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+
+        .voice-button:hover {
+            background: #059669;
+        }
+
+        .voice-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Input Area */
+        .input-container {
+            background: white;
+            border-top: 1px solid #e5e5e5;
+            padding: 16px 24px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            border-color: #10b981;
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upload {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-upload:hover {
+            background: #edf2f7;
+        }
+
+        .btn-send {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #059669;
+        }
+
+        .btn-send:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* Hidden file input */
+        #imageInput {
+            display: none;
+        }
+
+        /* Welcome Message */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+
+        .welcome-text {
+            font-size: 16px;
+            color: #718096;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        .quick-tips {
+            margin-top: 32px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tip-card {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            max-width: 200px;
+        }
+
+        .tip-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .tip-text {
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .message {
+                max-width: 90%;
+            }
+
+            .chat-container {
+                padding: 16px;
+            }
+
+            .input-container {
+                padding: 12px 16px;
+            }
+
+            .quick-tips {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            <span class="plant-icon">🌱</span>
+            PlantGuard AI
+            <span class="subtitle">Plant Disease Detection Assistant</span>
+        </h1>
+        <div class="weather-widget" id="weatherWidget" onclick="openWeatherModal()">
+            <div class="weather-icon" id="weatherIcon">🌤️</div>
+            <div class="weather-info">
+                <div class="weather-temp" id="weatherTemp">--°C</div>
+                <div class="weather-location" id="weatherLocation">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Modal -->
+    <div class="weather-modal" id="weatherModal" onclick="closeWeatherModal(event)">
+        <div class="weather-modal-content" onclick="event.stopPropagation()">
+            <div class="weather-modal-header">
+                <h2 class="weather-modal-title">🌤️ Weather & Plant Care</h2>
+                <button class="weather-close" onclick="closeWeatherModal()">&times;</button>
+            </div>
+            <div class="weather-search">
+                <input type="text" id="cityInput" placeholder="Enter city name (e.g., London, New York)">
+                <button onclick="searchWeather()">Search</button>
+            </div>
+            <div id="weatherContent">
+                <p style="text-align: center; color: #718096;">Loading weather data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container" id="chatContainer">
+        <!-- Welcome Message (shown initially) -->
+        <div class="welcome-container" id="welcomeContainer">
+            <div class="welcome-icon">🌿</div>
+            <h2 class="welcome-title">Welcome to PlantGuard AI</h2>
+            <p class="welcome-text">
+                Your intelligent plant disease detection assistant. Upload a clear photo of your plant's leaves, 
+                and I'll help identify diseases and provide expert treatment advice.
+            </p>
+            <div class="quick-tips">
+                <div class="tip-card">
+                    <div class="tip-icon">📸</div>
+                    <div class="tip-text">Take a clear photo of affected leaves</div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔍</div>
+                    <div class="tip-text">Get instant AI analysis</div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">💊</div>
+                    <div class="tip-text">Receive treatment recommendations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-container">
+        <div class="input-wrapper">
+            <input type="text" 
+                   class="input-field" 
+                   id="messageInput" 
+                   placeholder="Describe the problem or upload a plant image..."
+                   autocomplete="off">
+            <div class="input-buttons">
+                <button class="btn btn-upload" onclick="document.getElementById('imageInput').click()">
+                    <span>📎</span> Upload
+                </button>
+                <button class="btn btn-send" id="sendBtn" onclick="sendMessage()">
+                    <span>📤</span> Send
+                </button>
+            </div>
+            <input type="file" 
+                   id="imageInput" 
+                   accept="image/*" 
+                   onchange="handleImageUpload(event)">
+        </div>
+    </div>
+
+    <script>
+        let currentAudio = null;
+        let sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        let lastDetectionResult = null;
+        let currentWeatherData = null;
+        let currentLocation = null;
+
+        // Weather Functions
+        async function loadWeather(city = null) {
+            try {
+                let url;
+                
+                if (city) {
+                    // Search for specific city
+                    url = `/api/weather?location=${encodeURIComponent(city)}`;
+                } else {
+                    // Try to get user's location
+                    const position = await getUserLocation();
+                    if (position) {
+                        url = `/api/weather?lat=${position.latitude}&lon=${position.longitude}`;
+                    } else {
+                        // Fallback to default
+                        url = '/api/weather';
+                    }
+                }
+                
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentWeatherData = data;
+                    currentLocation = city || data.city;
+                    updateWeatherWidget(data);
+                    return data;
+                } else {
+                    console.error('Failed to load weather');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Weather fetch error:', error);
+                return null;
+            }
+        }
+
+        function getUserLocation() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    console.log('Geolocation not supported');
+                    resolve(null);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        });
+                    },
+                    (error) => {
+                        console.log('Geolocation error:', error.message);
+                        resolve(null);
+                    },
+                    {
+                        timeout: 5000,
+                        maximumAge: 600000 // Cache for 10 minutes
+                    }
+                );
+            });
+        }
+
+        function updateWeatherWidget(data) {
+            const iconMap = {
+                '01d': '☀️', '01n': '🌙',
+                '02d': '🌤️', '02n': '☁️',
+                '03d': '☁️', '03n': '☁️',
+                '04d': '☁️', '04n': '☁️',
+                '09d': '🌧️', '09n': '🌧️',
+                '10d': '🌦️', '10n': '🌧️',
+                '11d': '⛈️', '11n': '⛈️',
+                '13d': '❄️', '13n': '❄️',
+                '50d': '🌫️', '50n': '🌫️'
+            };
+
+            document.getElementById('weatherIcon').textContent = iconMap[data.icon] || '🌤️';
+            document.getElementById('weatherTemp').textContent = `${data.temperature}°C`;
+            document.getElementById('weatherLocation').textContent = `${data.city}, ${data.country}`;
+        }
+
+        function openWeatherModal() {
+            document.getElementById('weatherModal').classList.add('show');
+            displayWeatherDetails(currentWeatherData);
+        }
+
+        function closeWeatherModal(event) {
+            if (!event || event.target === document.getElementById('weatherModal')) {
+                document.getElementById('weatherModal').classList.remove('show');
+            }
+        }
+
+        async function searchWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (!city) return;
+
+            document.getElementById('weatherContent').innerHTML = '<p style=\"text-align: center; color: #718096;\">Loading...</p>';
+            
+            const data = await loadWeather(city);
+            if (data) {
+                displayWeatherDetails(data);
+            } else {
+                document.getElementById('weatherContent').innerHTML = '<p style=\"text-align: center; color: #e53e3e;\">City not found. Please try again.</p>';
+            }
+        }
+
+        function displayWeatherDetails(data) {
+            if (!data) return;
+
+            const tips = data.plant_care_tips && data.plant_care_tips.length > 0 
+                ? `<div class=\"plant-care-tips\">
+                    <h3>🌱 Plant Care Recommendations</h3>
+                    <ul>
+                        ${data.plant_care_tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                   </div>`
+                : '';
+
+            document.getElementById('weatherContent').innerHTML = `
+                <div style=\"text-align: center; margin-bottom: 20px;\">
+                    <div style=\"font-size: 64px; margin-bottom: 10px;\">${document.getElementById('weatherIcon').textContent}</div>
+                    <div style=\"font-size: 32px; font-weight: 600; color: #2d3748;\">${data.temperature}°C</div>
+                    <div style=\"font-size: 16px; color: #718096; margin-top: 4px;\">${data.description}</div>
+                    <div style=\"font-size: 14px; color: #a0aec0; margin-top: 8px;\">📍 ${data.city}, ${data.country}</div>
+                </div>
+                <div class=\"weather-details\">
+                    <div class=\"weather-detail-item\">
+                        <div class=\"weather-detail-label\">Feels Like</div>
+                        <div class=\"weather-detail-value\">${data.feels_like}°C</div>
+                    </div>
+                    <div class=\"weather-detail-item\">
+                        <div class=\"weather-detail-label\">Humidity</div>
+                        <div class=\"weather-detail-value\">${data.humidity}%</div>
+                    </div>
+                    <div class=\"weather-detail-item\">
+                        <div class=\"weather-detail-label\">Wind Speed</div>
+                        <div class=\"weather-detail-value\">${data.wind_speed} km/h</div>
+                    </div>
+                    <div class=\"weather-detail-item\">
+                        <div class=\"weather-detail-label\">Pressure</div>
+                        <div class=\"weather-detail-value\">${data.pressure} hPa</div>
+                    </div>
+                </div>
+                ${tips}
+            `;
+        }
+
+        // Enter key for weather search
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('cityInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchWeather();
+                }
+            });
+        });
+
+        // Hide welcome message and show chat
+        function hideWelcome() {
+            const welcome = document.getElementById('welcomeContainer');
+            if (welcome) {
+                welcome.style.display = 'none';
+            }
+        }
+
+        // Add message to chat
+        function addMessage(content, isUser, imageUrl = null, audioData = null) {
+            hideWelcome();
+            const chatContainer = document.getElementById('chatContainer');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.className = 'message-image';
+                contentDiv.appendChild(img);
+            }
+            
+            if (typeof content === 'string') {
+                const textNode = document.createElement('div');
+                textNode.textContent = content;
+                contentDiv.appendChild(textNode);
+            } else {
+                contentDiv.appendChild(content);
+            }
+            
+            // Add voice button if audio is available (for assistant messages)
+            if (audioData && !isUser) {
+                const voiceBtn = document.createElement('button');
+                voiceBtn.className = 'voice-button';
+                voiceBtn.textContent = '🔊 Listen';
+                voiceBtn.onclick = () => playAudio(audioData);
+                contentDiv.appendChild(voiceBtn);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            hideWelcome();
+            const chatContainer = document.getElementById('chatContainer');
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '🤖';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(contentDiv);
+            
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Remove typing indicator
+        function removeTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        // Create disease result card
+        function createDiseaseCard(data) {
+            const card = document.createElement('div');
+            card.innerHTML = `
+                <div>${data.message}</div>
+                <div class="disease-card">
+                    <div class="disease-header">
+                        <div class="disease-name">${data.disease}</div>
+                        <div class="confidence-badge">${data.confidence}% confidence</div>
+                    </div>
+                    <div class="disease-info">
+                        <div class="info-row">
+                            <div class="info-label">🔬 Cause:</div>
+                            <div class="info-value">${data.cause}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">💊 Treatment:</div>
+                            <div class="info-value">${data.treatment}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">🛡️ Prevention:</div>
+                            <div class="info-value">${data.prevention}</div>
+                        </div>
+                    </div>
+                    ${data.audio ? `<button class="voice-button" onclick="playAudio('${data.audio}')">🔊 Listen to advice</button>` : ''}
+                </div>
+            `;
+            return card;
+        }
+
+        // Play audio
+        function playAudio(audioBase64) {
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+            
+            const audio = new Audio('data:audio/mpeg;base64,' + audioBase64);
+            currentAudio = audio;
+            audio.play();
+        }
+
+        // Handle image upload
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Create image preview URL
+            const imageUrl = URL.createObjectURL(file);
+            
+            // Show user message with image
+            addMessage('Please analyze this plant image', true, imageUrl);
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Send to API
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('session_id', sessionId);
+            
+            try {
+                const response = await fetch('/api/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                removeTyping();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    lastDetectionResult = data; // Store for context
+                    const card = createDiseaseCard(data);
+                    addMessage(card, false);
+                } else {
+                    // Handle error responses with specific messages
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || 'Sorry, I encountered an error analyzing the image. Please try again.';
+                    const suggestion = errorData.suggestion || '';
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.color = '#e53e3e';
+                    errorDiv.innerHTML = `<strong>⚠️ ${errorMessage}</strong>${suggestion ? '<br><br>' + suggestion : ''}`;
+                    addMessage(errorDiv, false);
+                }
+            } catch (error) {
+                removeTyping();
+                addMessage('Sorry, I couldn\'t connect to the server. Please check if the backend is running.', false);
+            }
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Send text message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Show user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        session_id: sessionId,
+                        location: currentLocation  // Pass weather location for context
+                    })
+                });
+                
+                removeTyping();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response, false, null, data.audio);
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', false);
+                }
+            } catch (error) {
+                removeTyping();
+                addMessage('Sorry, I couldn\'t connect to the server. Please check if the backend is running.', false);
+            }
+        }
+
+        // Enter key to send
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Load weather on page load
+        setTimeout(() => {
+            loadWeather();
+        }, 500);
+    </script>
+</body>
+</html>
