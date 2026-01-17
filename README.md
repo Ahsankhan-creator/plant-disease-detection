@@ -143,6 +143,8 @@ git clone https://github.com/Ahsankhan-creator/plant-disease-detection-v3.git
 cd plant-disease-detection-v3
 ```
 
+> **Note**: If you forked this repository, replace `Ahsankhan-creator` with your GitHub username in the clone command above.
+
 ### 2. Create a Virtual Environment
 
 **On Linux/macOS:**
@@ -156,8 +158,6 @@ source venv/bin/activate
 python -m venv venv
 venv\Scripts\activate
 ```
-
-> **Note**: If you forked this repository, replace `Ahsankhan-creator` with your GitHub username in the clone command above.
 
 ### 3. Install Dependencies
 
@@ -270,10 +270,10 @@ results = detector.predict_batch(['img1.jpg', 'img2.jpg', 'img3.jpg'])
 Start the web application:
 
 ```bash
-# Development mode
+# Development mode (local access only)
 python app.py
 
-# Or with Flask (development)
+# Or with Flask (development - local access only)
 flask run --host=127.0.0.1 --port=5000
 
 # Production mode with Gunicorn
@@ -520,7 +520,7 @@ python scripts/prepare_dataset.py \
 | EfficientNetB3 | 98.3% | 0.98 | 35ms | 48 MB |
 | VGG16 | 95.8% | 0.95 | 60ms | 528 MB |
 
-*Tested on NVIDIA Tesla T4 GPU
+*Tested on NVIDIA Tesla T4 GPU*
 
 ### Training Details
 
@@ -573,10 +573,11 @@ Edit `config/config.json` to customize the application:
     "confidence_threshold": 0.75
   },
   "api": {
-    "host": "127.0.0.1",  // Use "0.0.0.0" only in production with proper security
+    "host": "127.0.0.1",
     "port": 5000,
     "debug": false,
-    "max_upload_size": "10MB"
+    "max_upload_size": "10MB",
+    "note": "Use 0.0.0.0 only in production with proper security"
   },
   "preprocessing": {
     "resize": [224, 224],
