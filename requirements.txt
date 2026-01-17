@@ -1,11 +1,14 @@
+# Use CPU-only PyTorch wheels (much smaller for Netlify)
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.1.0+cpu
+torchvision==0.16.0+cpu
+
 # Core Flask Framework
 Flask==2.3.3
 flask-cors==4.0.0
 Werkzeug==2.3.7
 
 # AI/ML Dependencies
-torch>=2.0.0
-torchvision>=0.15.0
 transformers>=4.30.0
 accelerate>=0.20.0
 safetensors>=0.3.0
@@ -16,6 +19,3 @@ Pillow==10.0.0
 # API Clients
 requests==2.31.0
 groq==0.4.1
-
-# Optimization for Vercel
-gunicorn==21.2.0
